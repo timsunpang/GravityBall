@@ -3,8 +3,44 @@
   margin: 0 auto;
 	border: 1px solid blue;
 	margin: 50px auto;
+	background: lightgrey;
 }
 
 body {
   background-color: white;
+	background: #517fa4; /* fallback for old browsers */
+	background: -webkit-linear-gradient(to left, #517fa4 , #243949); /* Chrome 10-25, Safari 5.1-6 */
+	background: linear-gradient(to left, #517fa4 , #243949); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+
+.lightbox {
+
+	background: white;
+ 	border: 20px solid rgba(0, 0, 0, 0.3);
+
+  -moz-background-clip: border;     /* Firefox 3.6 */
+  -webkit-background-clip: border;  /* Safari 4? Chrome 6? */
+  background-clip: border-box;      /* Firefox 4, Safari 5, Opera 10, IE 9 */
+
+  -moz-background-clip: padding;     /* Firefox 3.6 */
+  -webkit-background-clip: padding;  /* Safari 4? Chrome 6? */
+  background-clip: padding-box;      /* Firefox 4, Safari 5, Opera 10, IE 9 */
+
+  -moz-background-clip: content;     /* Firefox 3.6 */
+  -webkit-background-clip: content;  /* Safari 4? Chrome 6? */
+  background-clip: content-box;      /* Firefox 4, Safari 5, Opera 10, IE 9 */
+
+}
+
+.directions-container {
+	display: flex;
+  flex-direction: column;
+  position: absolute;
+  margin: -37% 0px 0px 5%;
+  border: 1px solid black;
+  background: lightgrey;
+}
+
+.directions {
+	padding: 3px;
 }

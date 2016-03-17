@@ -1,32 +1,36 @@
+levels = require('./levels/levels');
+
 $(document).ready(function() {
   (function() {
       var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
       window.requestAnimationFrame = requestAnimationFrame;
   })();
 
-  function getRandomIntInclusive(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  var lvlNumToObj = function(num) {
+    return levels[num];
   };
 
   var canvas = document.getElementById("canvas"),
       ctx = canvas.getContext("2d"),
-      width = 600,
+      width = 700,
       height = 600,
       game = {
-        lives: 5,
-        playing: false
+        retries: 0,
+        playing: false,
+        over: false
       },
-      level = {
+      currentLevel = {
         won: false,
         number: 1
-      },
-      player = {
-        x : 80,
-        y : 80,
+      };
+      currentLevel.level = lvlNumToObj(currentLevel.number);
+    var  player = {
+        x : currentLevel.level.startX,
+        y : currentLevel.level.startY,
         width : 50,
         height : 50,
         radius: 30,
-        speed: 3,
+        speed: 2.8,
         velX: 0,
         velY: 0,
         pauseVelX: null,
@@ -41,6 +45,10 @@ $(document).ready(function() {
 
   canvas.width = width;
   canvas.height = height;
+
+  var nextLevel = function() {
+    currentLevel.number++;
+  };
 
   function update(){
     if (game.playing){
@@ -74,13 +82,9 @@ $(document).ready(function() {
           player.paused = !player.paused;
       }
 
-      if (player.paused) {
+      if (player.paused || game.over) {
         player.velX = 0;
         player.velY = 0;
-        ctx.font = "50px Arial";
-        ctx.fillStyle = "black";
-        ctx.textAlign = "center";
-        ctx.fillText("Paused", width/2, height/2);
       } else {
         player.velX *= friction;
         player.velY += gravity;
@@ -91,37 +95,37 @@ $(document).ready(function() {
 
 
       if (player.x >= width-player.radius) {
-          player.y = 80;
-          player.x = 80;
+          player.y = currentLevel.level.startY;
+          player.x = currentLevel.level.startX;
           player.velX = 0;
           player.velY = 0;
-          game.lives--;
+          game.retries++;
       } else if (player.x <= player.radius) {
-          player.y = 80;
-          player.x = 80;
+          player.y = currentLevel.level.startY;
+          player.x = currentLevel.level.startX;
           player.velX = 0;
           player.velY = 0;
-          game.lives--;
+          game.retries++;
       }
 
       if(player.y >= height-player.radius){
-          player.y = 80;
-          player.x = 80;
+          player.y = currentLevel.level.startY;
+          player.x = currentLevel.level.startX;
           player.velX = 0;
           player.velY = 0;
-          game.lives--;
+          game.retries++;
       } else if (player.y <= player.radius) {
-          player.y = 80;
-          player.x = 80;
+          player.y = currentLevel.level.startY;
+          player.x = currentLevel.level.startX;
           player.velX = 0;
           player.velY = 0;
-          game.lives--;
+          game.retries++;
       };
 
-    if(player.x <= 540 && player.x >= 460 && player.y <= 540 && player.y >= 460){
+    if(player.x <= currentLevel.level.goalX + 40 && player.x >= currentLevel.level.goalX - 40 && player.y <= currentLevel.level.goalY + 40 && player.y >= currentLevel.level.goalY - 40){
           player.y = player.y;
           player.x = player.x;
-          level.won = true;
+          currentLevel.won = true;
       };
 
 
@@ -135,54 +139,91 @@ $(document).ready(function() {
 
       /* Goal */
       ctx.beginPath();
-      ctx.arc(canvas.width - 100, canvas.height - 100, 40, 0, Math.PI*2, false);
+      ctx.arc(currentLevel.level.goalX, currentLevel.level.goalY, 40, 0, Math.PI*2, false);
       ctx.fillStyle = "black";
       ctx.fill();
       ctx.closePath();
 
-
-      ctx.beginPath();
-      ctx.arc(player.x, player.y, player.radius, 0, Math.PI*2, false);
-      ctx.fillStyle = "blue";
-      ctx.fill();
-      ctx.closePath();
-
       ctx.fillStyle = "black";
-      ctx.font = "25px Arial";
-      ctx.fillText("Lives: " + game.lives, 450, 50);
-      ctx.fillText("Level: " + level.number, 450, 80);
+      ctx.font = "20px Arial";
+      ctx.fillText("Retries: " + game.retries, 630, 50);
+      ctx.fillText("Level: " + currentLevel.number, 630, 80);
 
-      obstacles.forEach(function(obstacle) {
+
+    if (currentLevel.level.obstacles.length > 0) {
+      currentLevel.level.obstacles.forEach(function(obstacle) {
         ctx.fillStyle = "red";
         ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
         if (player.x + player.radius >= obstacle.x && player.x - player.radius <= obstacle.x + obstacle.width
-            && player.y + player.radius >= obstacle.y && player.y - player.radius <= obstacle.y + obstacle.height) {
-            player.y = 80;
-            player.x = 80;
+          && player.y + player.radius >= obstacle.y && player.y - player.radius <= obstacle.y + obstacle.height) {
+            player.y = currentLevel.level.startY;
+            player.x = currentLevel.level.startX;
             player.velX = 0;
             player.velY = 0;
-            game.lives--;
-        }
-      });
-    };
+            game.retries++;
+          }
+        });
+      };
 
-    if (game.lives === 0) {
-      player.velX = 0;
-      player.velY = 0;
-      ctx.font = "50px Arial";
-      ctx.fillStyle = "black";
-      ctx.textAlign = "center";
-      ctx.fillText("Game Over", width/2, height/2);
-    } else if (!level.won) {
-      requestAnimationFrame(update);
-    } else {
-      level.number++;
-      player.y = 80;
-      player.x = 80;
-      player.velX = 0;
-      player.velY = 0;
-      level.won = false;
-      obstacles.push({x: getRandomIntInclusive(150, 450), y: getRandomIntInclusive(150, 450), width: getRandomIntInclusive(20, 50), height: getRandomIntInclusive(20, 50)})
+    if (currentLevel.level.switches.length > 0) {
+      currentLevel.level.switches.forEach(function(button) {
+        ctx.beginPath();
+        if (!button.on) {
+          ctx.arc(button.switchX, button.switchY, 25, 0, Math.PI*2, false);
+          ctx.fillStyle = "yellow";
+          ctx.fill();
+          ctx.closePath();
+
+          ctx.fillRect(button.gateX, button.gateY, button.gateWidth, button.gateHeight);
+          if (player.x + player.radius >= button.gateX && player.x - player.radius <= button.gateX + button.gateWidth
+            && player.y + player.radius >= button.gateY && player.y - player.radius <= button.gateY + button.gateHeight) {
+              player.y = currentLevel.level.startY;
+              player.x = currentLevel.level.startX;
+              player.velX = 0;
+              player.velY = 0;
+              game.retries++;
+            }
+
+        } else {
+          ctx.arc(button.switchX, button.switchY, 25, 0, Math.PI*2, false);
+          ctx.fillStyle = "lightgreen";
+          ctx.fill();
+          ctx.closePath();
+        };
+        if (player.x <= button.switchX + 25 && player.x >= button.switchX - 25
+          && player.y <= button.switchY + 25 && player.y >= button.switchY - 25) {
+            if (!button.on) {button.on = true};
+          }
+        });
+      };
+    }
+
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.radius, 0, Math.PI*2, false);
+    ctx.fillStyle = "blue";
+    ctx.fill();
+    ctx.closePath();
+
+      if (game.over) {
+        ctx.font = "50px Arial";
+        ctx.fillStyle = "black";
+        ctx.textAlign = "center";
+        ctx.fillText("Thanks for Playing!", width/2, 100);
+      }
+      else if (!currentLevel.won) {
+        requestAnimationFrame(update);
+      } else {
+      if (levels[currentLevel.number + 1]){
+        currentLevel.number++;
+        currentLevel.level = lvlNumToObj(currentLevel.number);
+        player.y = currentLevel.level.startY;
+        player.x = currentLevel.level.startX;
+        player.velX = 0;
+        player.velY = 0;
+        currentLevel.won = false;
+      } else {
+        game.over = true;
+      };
       requestAnimationFrame(update);
     }
   } else {
