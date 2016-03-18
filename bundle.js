@@ -176,29 +176,39 @@
 
 
 	    if (player.paused) {
-	      ctx.font = "50px Arial";
-	      ctx.fillStyle = "black";
+	      ctx.font = "50px Ubuntu";
+	      ctx.fillStyle = "white";
 	      ctx.textAlign = "center";
 	      ctx.fillText("Paused", width/2, height/2);
 	    } else {
 	      ctx.clearRect(0,0,width,height);
 
 	      /* Goal */
+	      var grd = ctx.createRadialGradient(currentLevel.level.goalX, currentLevel.level.goalY, 40, currentLevel.level.goalX, currentLevel.level.goalY, 30);
+	      // white
+	      grd.addColorStop(0, '#ffffff');
+	      // black
+	      grd.addColorStop(1, '#000000');
+
 	      ctx.beginPath();
 	      ctx.arc(currentLevel.level.goalX, currentLevel.level.goalY, 40, 0, Math.PI*2, false);
-	      ctx.fillStyle = "black";
+	      ctx.fillStyle = grd;
 	      ctx.fill();
 	      ctx.closePath();
 
-	      ctx.fillStyle = "black";
-	      ctx.font = "20px Arial";
+	      ctx.fillStyle = "white";
+	      ctx.font = "20px Ubuntu";
 	      ctx.fillText("Retries: " + game.retries, 630, 50);
 	      ctx.fillText("Level: " + currentLevel.number, 630, 80);
 
 
 	    if (currentLevel.level.obstacles.length > 0) {
 	      currentLevel.level.obstacles.forEach(function(obstacle) {
-	        ctx.fillStyle = "red";
+	        grd=ctx.createLinearGradient(obstacle.x,obstacle.y,obstacle.x + obstacle.width, obstacle.y + obstacle.height);
+	        grd.addColorStop(0, '#FF0000');
+	        grd.addColorStop(1,"#C40E0E");
+
+	        ctx.fillStyle = grd;
 	        ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
 	        if (player.x + player.radius >= obstacle.x && player.x - player.radius <= obstacle.x + obstacle.width
 	          && player.y + player.radius >= obstacle.y && player.y - player.radius <= obstacle.y + obstacle.height) {
@@ -244,15 +254,22 @@
 	      };
 	    }
 
+	    // create radial gradient
+	    grd = ctx.createRadialGradient(player.x, player.y, player.radius, player.x, player.y, player.radius - 20);
+	    // light blue
+	    grd.addColorStop(0, '#1aa3ff');
+	    // dark blue
+	    grd.addColorStop(1, '#004CB3');
+
 	    ctx.beginPath();
 	    ctx.arc(player.x, player.y, player.radius, 0, Math.PI*2, false);
-	    ctx.fillStyle = "blue";
+	    ctx.fillStyle = grd;
 	    ctx.fill();
 	    ctx.closePath();
 
 	      if (game.over) {
-	        ctx.font = "50px Arial";
-	        ctx.fillStyle = "black";
+	        ctx.font = "50px Ubuntu";
+	        ctx.fillStyle = "white";
 	        ctx.textAlign = "center";
 	        ctx.fillText("Thanks for Playing!", width/2, 100);
 	      }
@@ -273,11 +290,11 @@
 	      requestAnimationFrame(update);
 	    }
 	  } else {
-	    ctx.font = "50px Arial";
-	    ctx.fillStyle = "black";
+	    ctx.font = "50px Ubuntu";
+	    ctx.fillStyle = "white";
 	    ctx.textAlign = "center";
-	    ctx.fillText("Gravity Ball", width/2, 100);
-	    ctx.font = "25px Arial";
+	    ctx.fillText("GravityBall", width/2, 100);
+	    ctx.font = "25px Ubuntu";
 	    ctx.fillText("Use the arrow keys to direct the blue ball into", width/2, 200);
 	    ctx.fillText("the black hole, while avoiding red blocks!", width/2, 250);
 	    ctx.fillText("Press any key to begin!", width/2, 400);
