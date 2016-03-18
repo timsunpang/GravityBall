@@ -290,6 +290,7 @@
 	      requestAnimationFrame(update);
 	    }
 	  } else {
+	    ctx.clearRect(0,0,width,height);
 	    ctx.font = "50px Ubuntu";
 	    ctx.fillStyle = "white";
 	    ctx.textAlign = "center";
