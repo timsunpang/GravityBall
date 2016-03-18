@@ -17,7 +17,9 @@ $(document).ready(function() {
       game = {
         retries: 0,
         playing: false,
-        over: false
+        over: false,
+        reset: false,
+        playthrough: 1
       },
       currentLevel = {
         won: false,
@@ -30,7 +32,7 @@ $(document).ready(function() {
         width : 50,
         height : 50,
         radius: 30,
-        speed: 2.8,
+        speed: 2.8 + (.5 * (game.playthrough - 1)),
         velX: 0,
         velY: 0,
         pauseVelX: null,
@@ -40,8 +42,8 @@ $(document).ready(function() {
       keys = [],
       obstacles = [],
       pauseHeld = false,
-      friction = 0.8,
-      gravity = 0.5;
+      horizontalMvmt = 0.8,
+      gravity = 0.5 + (.5 * (game.playthrough - 1))
 
   canvas.width = width;
   canvas.height = height;
@@ -86,7 +88,7 @@ $(document).ready(function() {
         player.velX = 0;
         player.velY = 0;
       } else {
-        player.velX *= friction;
+        player.velX *= horizontalMvmt;
         player.velY += gravity;
 
         player.x += player.velX;
@@ -149,12 +151,6 @@ $(document).ready(function() {
       ctx.fillStyle = grd;
       ctx.fill();
       ctx.closePath();
-
-      ctx.fillStyle = "white";
-      ctx.font = "20px Ubuntu";
-      ctx.fillText("Retries: " + game.retries, 630, 50);
-      ctx.fillText("Level: " + currentLevel.number, 630, 80);
-
 
     if (currentLevel.level.obstacles.length > 0) {
       currentLevel.level.obstacles.forEach(function(obstacle) {
@@ -221,16 +217,43 @@ $(document).ready(function() {
     ctx.fill();
     ctx.closePath();
 
-      if (game.over) {
+    ctx.fillStyle = "white";
+    ctx.font = "20px Ubuntu";
+    ctx.fillText("Retries: " + game.retries, 630, 50);
+    ctx.fillText("Level: " + currentLevel.number, 630, 80);
+    if (game.playthrough > 1){
+      ctx.fillText("Playthrough: " + game.playthrough, 630, 110);
+    };
+
+      if (game.reset) {
+        ctx.clearRect(0,0,width,height);
+        currentLevel.number = 1;
+        currentLevel.level = lvlNumToObj(currentLevel.number);
+        player.y = currentLevel.level.startY;
+        player.x = currentLevel.level.startX;
+        player.velX = 0;
+        player.velY = 0;
+        currentLevel.won = false;
+        game.reset = false;
+        requestAnimationFrame(update);
+      } else if (game.over) {
         ctx.font = "50px Ubuntu";
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
         ctx.fillText("Thanks for Playing!", width/2, 100);
+        ctx.font = "25px Ubuntu";
+        ctx.fillText("Press any button to play again!", width/2, 150);
+        requestAnimationFrame(update);
       }
       else if (!currentLevel.won) {
         requestAnimationFrame(update);
       } else {
       if (levels[currentLevel.number + 1]){
+        if (currentLevel.level.switches.length > 0) {
+          currentLevel.level.switches.forEach(function(button) {
+            button.on = false;
+          })
+        }
         currentLevel.number++;
         currentLevel.level = lvlNumToObj(currentLevel.number);
         player.y = currentLevel.level.startY;
@@ -240,10 +263,16 @@ $(document).ready(function() {
         currentLevel.won = false;
       } else {
         game.over = true;
+        if (currentLevel.level.switches.length > 0) {
+          currentLevel.level.switches.forEach(function(button) {
+            button.on = false;
+          })
+        }
       };
       requestAnimationFrame(update);
     }
   } else {
+    ctx.clearRect(0,0,width,height);
     ctx.font = "50px Ubuntu";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
@@ -261,6 +290,11 @@ $(document).ready(function() {
       keys[e.keyCode] = true;
       if (!game.playing) {
         game.playing = true;
+      }
+      if (game.over) {
+        game.reset = true;
+        game.over = false;
+        game.playthrough++;
       }
   });
 

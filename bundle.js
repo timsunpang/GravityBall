@@ -63,7 +63,9 @@
 	      game = {
 	        retries: 0,
 	        playing: false,
-	        over: false
+	        over: false,
+	        reset: false,
+	        playthrough: 1
 	      },
 	      currentLevel = {
 	        won: false,
@@ -76,7 +78,7 @@
 	        width : 50,
 	        height : 50,
 	        radius: 30,
-	        speed: 2.8,
+	        speed: 2.8 + (.5 * (game.playthrough - 1)),
 	        velX: 0,
 	        velY: 0,
 	        pauseVelX: null,
@@ -86,8 +88,8 @@
 	      keys = [],
 	      obstacles = [],
 	      pauseHeld = false,
-	      friction = 0.8,
-	      gravity = 0.5;
+	      horizontalMvmt = 0.8,
+	      gravity = 0.5 + (.5 * (game.playthrough - 1))
 
 	  canvas.width = width;
 	  canvas.height = height;
@@ -132,7 +134,7 @@
 	        player.velX = 0;
 	        player.velY = 0;
 	      } else {
-	        player.velX *= friction;
+	        player.velX *= horizontalMvmt;
 	        player.velY += gravity;
 
 	        player.x += player.velX;
@@ -195,12 +197,6 @@
 	      ctx.fillStyle = grd;
 	      ctx.fill();
 	      ctx.closePath();
-
-	      ctx.fillStyle = "white";
-	      ctx.font = "20px Ubuntu";
-	      ctx.fillText("Retries: " + game.retries, 630, 50);
-	      ctx.fillText("Level: " + currentLevel.number, 630, 80);
-
 
 	    if (currentLevel.level.obstacles.length > 0) {
 	      currentLevel.level.obstacles.forEach(function(obstacle) {
@@ -267,16 +263,43 @@
 	    ctx.fill();
 	    ctx.closePath();
 
-	      if (game.over) {
+	    ctx.fillStyle = "white";
+	    ctx.font = "20px Ubuntu";
+	    ctx.fillText("Retries: " + game.retries, 630, 50);
+	    ctx.fillText("Level: " + currentLevel.number, 630, 80);
+	    if (game.playthrough > 1){
+	      ctx.fillText("Playthrough: " + game.playthrough, 630, 110);
+	    };
+
+	      if (game.reset) {
+	        ctx.clearRect(0,0,width,height);
+	        currentLevel.number = 1;
+	        currentLevel.level = lvlNumToObj(currentLevel.number);
+	        player.y = currentLevel.level.startY;
+	        player.x = currentLevel.level.startX;
+	        player.velX = 0;
+	        player.velY = 0;
+	        currentLevel.won = false;
+	        game.reset = false;
+	        requestAnimationFrame(update);
+	      } else if (game.over) {
 	        ctx.font = "50px Ubuntu";
 	        ctx.fillStyle = "white";
 	        ctx.textAlign = "center";
 	        ctx.fillText("Thanks for Playing!", width/2, 100);
+	        ctx.font = "25px Ubuntu";
+	        ctx.fillText("Press any button to play again!", width/2, 150);
+	        requestAnimationFrame(update);
 	      }
 	      else if (!currentLevel.won) {
 	        requestAnimationFrame(update);
 	      } else {
 	      if (levels[currentLevel.number + 1]){
+	        if (currentLevel.level.switches.length > 0) {
+	          currentLevel.level.switches.forEach(function(button) {
+	            button.on = false;
+	          })
+	        }
 	        currentLevel.number++;
 	        currentLevel.level = lvlNumToObj(currentLevel.number);
 	        player.y = currentLevel.level.startY;
@@ -286,10 +309,16 @@
 	        currentLevel.won = false;
 	      } else {
 	        game.over = true;
+	        if (currentLevel.level.switches.length > 0) {
+	          currentLevel.level.switches.forEach(function(button) {
+	            button.on = false;
+	          })
+	        }
 	      };
 	      requestAnimationFrame(update);
 	    }
 	  } else {
+	    ctx.clearRect(0,0,width,height);
 	    ctx.font = "50px Ubuntu";
 	    ctx.fillStyle = "white";
 	    ctx.textAlign = "center";
@@ -307,6 +336,11 @@
 	      keys[e.keyCode] = true;
 	      if (!game.playing) {
 	        game.playing = true;
+	      }
+	      if (game.over) {
+	        game.reset = true;
+	        game.over = false;
+	        game.playthrough++;
 	      }
 	  });
 
@@ -347,74 +381,74 @@
 	    obstacles: [],
 	    switches: []
 	  },
-	  2: {
-	    startX: 80,
-	    startY: 80,
-	    goalX: 250,
-	    goalY: 250,
-	    obstacles: [],
-	    switches: []
-	  },
-	  3: {
-	    startX: 80,
-	    startY: 80,
-	    goalX: 500,
-	    goalY: 50,
-	    obstacles: [{x: 250, y: 0, width: 20, height: 300}],
-	    switches: []
-	  },
-	  4: {
-	    startX: 80,
-	    startY: 80,
-	    goalX: 500,
-	    goalY: 500,
-	    obstacles: [{x: 350, y: 300, width: 20, height: 300}, {x: 150, y: 0, width: 20, height: 300}],
-	    switches: []
-	  },
-	  5: {
-	    startX: 80,
-	    startY: 80,
-	    goalX: 530,
-	    goalY: 530,
-	    obstacles: [{x: 0, y: 180, width: 400, height: 20}, {x: 300, y: 380, width: 400, height: 20}],
-	    switches: []
-	  },
-	  6: {
-	    startX: 80,
-	    startY: 520,
-	    goalX: 650,
-	    goalY: 150,
-	    obstacles: [{x: 150, y: 0, width: 20, height: 350},
-	                {x: 150, y: 500, width: 20, height: 170},
-	                {x: 350, y: 0, width: 20, height: 100},
-	                {x: 350, y: 250, width: 20, height: 350},
-	                {x: 550, y: 0, width: 20, height: 450},
-	              ],
-	    switches: []
-	  },
-	  7: {
-	    startX: 80,
-	    startY: 520,
-	    goalX: 640,
-	    goalY: 550,
-	    obstacles: [{x: 550, y: 480, width: 20, height: 120}],
-	    switches: [{on: false, switchX: 250, switchY: 250, gateX: 570, gateY: 480, gateWidth: 130, gateHeight: 20}]
-	  },
-	  8: {
-	    startX: 600,
-	    startY: 500,
-	    goalX: 350,
-	    goalY: 250,
-	    obstacles: [{x: 285, y: 180, width: 20, height: 130},
-	                {x: 395, y: 180, width: 20, height: 130},
-	                {x: 285, y: 300, width: 130, height: 20},
-	                {x: 340, y: 300, width: 20, height: 300}
-	                ],
-	    switches: [{on: false, switchX: 200, switchY: 500, gateX: 285, gateY: 180, gateWidth: 130, gateHeight: 20}]
-	  }
+	 2: {
+	   startX: 80,
+	   startY: 80,
+	   goalX: 250,
+	   goalY: 250,
+	   obstacles: [],
+	   switches: []
+	 },
+	 3: {
+	   startX: 80,
+	   startY: 80,
+	   goalX: 500,
+	   goalY: 50,
+	   obstacles: [{x: 250, y: 0, width: 20, height: 300}],
+	   switches: []
+	 },
+	 4: {
+	   startX: 80,
+	   startY: 80,
+	   goalX: 500,
+	   goalY: 500,
+	   obstacles: [{x: 350, y: 300, width: 20, height: 300}, {x: 150, y: 0, width: 20, height: 300}],
+	   switches: []
+	 },
+	 5: {
+	   startX: 80,
+	   startY: 80,
+	   goalX: 530,
+	   goalY: 530,
+	   obstacles: [{x: 0, y: 180, width: 400, height: 20}, {x: 300, y: 380, width: 400, height: 20}],
+	   switches: []
+	 },
+	 6: {
+	   startX: 80,
+	   startY: 520,
+	   goalX: 650,
+	   goalY: 150,
+	   obstacles: [{x: 150, y: 0, width: 20, height: 350},
+	               {x: 150, y: 500, width: 20, height: 170},
+	               {x: 350, y: 0, width: 20, height: 100},
+	               {x: 350, y: 250, width: 20, height: 350},
+	               {x: 550, y: 0, width: 20, height: 450},
+	             ],
+	   switches: []
+	 },
+	 7: {
+	   startX: 80,
+	   startY: 520,
+	   goalX: 640,
+	   goalY: 550,
+	   obstacles: [{x: 550, y: 480, width: 20, height: 120}],
+	   switches: [{on: false, switchX: 250, switchY: 250, gateX: 570, gateY: 480, gateWidth: 130, gateHeight: 20}]
+	 },
+	 8: {
+	   startX: 600,
+	   startY: 500,
+	   goalX: 350,
+	   goalY: 250,
+	   obstacles: [{x: 285, y: 180, width: 20, height: 130},
+	               {x: 395, y: 180, width: 20, height: 130},
+	               {x: 285, y: 300, width: 130, height: 20},
+	               {x: 340, y: 300, width: 20, height: 300}
+	               ],
+	   switches: [{on: false, switchX: 200, switchY: 500, gateX: 285, gateY: 180, gateWidth: 130, gateHeight: 20}]
+	 }
 	};
 
-	module.exports = levels;
+	module.exports = dummy;
 
 
 /***/ }
