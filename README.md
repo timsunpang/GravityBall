@@ -1,9 +1,7 @@
 # GravityBall
 
 [**GravityBall**](http://timsunpang.github.io/GravityBall/) is a fun, simple game in which you use physics to maneuver a ball to
-a goal point without touching any walls. It gets increasingly difficult, however,
-as after each stage, an obstacle is randomly added to the screen. See how far
-you can get without losing 5 times!
+a goal point without touching any walls. It gets increasingly difficult, however, over 8 custom built stages. Good luck!
 
 [Click here to play!](http://timsunpang.github.io/GravityBall/)
 
