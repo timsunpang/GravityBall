@@ -8,10 +8,9 @@ you can get without losing 5 times!
 <p>
 <img src="http://res.cloudinary.com/ladh6sfp9/image/upload/v1458546638/Screen_Shot_2016-03-21_at_12.46.07_AM_jseqxl.png" height="500" width="585"></img>
 </p>
-<p>
+
 ## Directions: 
-<br/>
-Up arrow key: float up <br/>
-Left/Right arrow keys: move left and right <br/>
-Spacebar: Pause
-</p>
+↑: Hover<br/>
+←/→: Move left/right<br/>
+Spacebar: Pause<br/>
+
